@@ -48,7 +48,18 @@ class HomeController extends Controller
         if ($job == null) {
             abort(404);
         }
-        return view('user.account.job.jobDetail', ['job' => $job]);
+
+        $savedJob = SavedJob::where([
+            'user_id' => Auth::user()->id,
+            'job_id' => $id
+        ])->first();
+
+        $user = Auth::user();
+        $jobApplication = Application::where([
+            'user_id' => $user->id,
+            'job_id' => $id
+        ])->first();
+        return view('user.account.job.jobDetail', ['job' => $job, 'savedJob' => $savedJob, 'jobApplication' => $jobApplication]);
     }
 
     public function applyJob(Request $request)
@@ -61,7 +72,7 @@ class HomeController extends Controller
         if (auth()->user()->role == 'admin') {
             return redirect()->route('jobDetail', ['id' => $request->id])->with('error', 'Admin cannot apply for jobs.');
         }
-       
+
         // Lấy thông tin người dùng hiện tại
         $user = Auth::user();
 
@@ -112,7 +123,7 @@ class HomeController extends Controller
         if (!auth()->check()) {
             return redirect()->route('jobDetail', ['id' => $id])->with('error', 'You need to login first.');
         }
-        
+
 
         $job = Job::where('id', $id)->first();
 
@@ -139,12 +150,16 @@ class HomeController extends Controller
         $savedJob->user_id = Auth::user()->id;
         $savedJob->save();
         return redirect()->route('jobDetail', ['id' => $id])->with('success', 'Save job successfully.');
-
     }
     public function deleteapply($id)
     {
         $jobApplication = Application::findOrFail($id);
         $jobApplication->delete();
+
+        $previousUrl = url()->previous();
+        if (strpos($previousUrl, 'jobs/detail') !== false) {
+            return redirect()->back()->with('success', 'Job application deleted successfully.');
+        }
 
         return redirect()->route('account.myJobApplications')->with('success', 'Job application deleted successfully.');
     }
@@ -153,13 +168,11 @@ class HomeController extends Controller
         $savejobs = SavedJob::findOrFail($id);
         $savejobs->delete();
 
+        $previousUrl = url()->previous();
+        if (strpos($previousUrl, 'jobs/detail') !== false) {
+            return redirect()->back()->with('success', 'Job saved deleted successfully.');
+        }
+
         return redirect()->route('account.savejobs')->with('success', 'Job saved deleted successfully.');
     }
-
-
-
-
-
-
-
 }
