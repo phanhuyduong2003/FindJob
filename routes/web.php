@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\FindController;
+use App\Http\Controllers\JobTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/category/create', [CategoryController::class, 'store'])->name('admin.category.store');
 
     Route::get('/admin/category/manage', [CategoryController::class, 'manage'])->name('admin.category.manage');
+
+    // Type
+    Route::get('/admin/job-type/create', [JobTypeController::class, 'create'])->name('admin.jobType.create');
+    Route::post('/admin/job-type/create', [JobTypeController::class, 'store'])->name('admin.jobType.store');
+
+    Route::get('/admin/job-type/manage', [JobTypeController::class, 'manage'])->name('admin.jobType.manage');
 });
 
 require __DIR__ . '/auth.php';
